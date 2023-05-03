@@ -1,3 +1,5 @@
+import 'package:calculator_app/screens/calculator_screen.dart';
+import 'package:calculator_app/widgets/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -5,13 +7,13 @@ void main() {
   runApp(
     ChangeNotifierProvider(
       create: (_) => ThemeProvider(),
-      child: const myApp(),
+      child: const MyApp(),
     ),
   );
 }
 
-class myApp extends StatelessWidget {
-  const myApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,17 +24,6 @@ class myApp extends StatelessWidget {
       home: const HomePage(),
       debugShowCheckedModeBanner: false,
     );
-  }
-}
-
-class ThemeProvider extends ChangeNotifier {
-  ThemeData _themeData = ThemeData.dark();
-
-  ThemeData getTheme() => _themeData;
-
-  void setTheme(ThemeData themeData) {
-    _themeData = themeData;
-    notifyListeners();
   }
 }
 
@@ -59,16 +50,16 @@ class _HomePageState extends State<HomePage> {
                 child: const Text("Light Theme"),
               ),
               PopupMenuItem(
-                child: const Text("Dark Theme"),
                 value: ThemeData.dark(),
+                child: const Text("Dark Theme"),
               ),
             ],
             onSelected: (themeData) {
               themeProvider.setTheme(themeData);
             },
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: const Icon(Icons.dark_mode),
+            child: const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Icon(Icons.dark_mode),
             ),
           ),
         ],
@@ -77,50 +68,64 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(10.0),
-                alignment: Alignment.bottomRight,
-                child: Text(
-                  text,
-                  style: const TextStyle(
-                      fontSize: 60.0,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white),
+            CalculatorScreen(text: text),
+            Container(
+              decoration: const BoxDecoration(
+                color: Colors.transparent,
+                border: Border(
+                  top: BorderSide(
+                    width: 1.0,
+                    color: Colors.grey,
+                  ),
                 ),
               ),
-            ),
-            Row(
-              children: <Widget>[
-                customOutlineButton("7"),
-                customOutlineButton("8"),
-                customOutlineButton("9"),
-                customOutlineButton("x"),
-              ],
-            ),
-            Row(
-              children: <Widget>[
-                customOutlineButton("4"),
-                customOutlineButton("5"),
-                customOutlineButton("6"),
-                customOutlineButton("-"),
-              ],
-            ),
-            Row(
-              children: <Widget>[
-                customOutlineButton("1"),
-                customOutlineButton("2"),
-                customOutlineButton("3"),
-                customOutlineButton("+"),
-              ],
-            ),
-            Row(
-              children: <Widget>[
-                customOutlineButton("C"),
-                customOutlineButton("0"),
-                customOutlineButton("."),
-                customOutlineButton("="),
-              ],
+              child: Column(
+                children: [
+                  Divider(
+                    color: Colors.transparent,
+                  ),
+                  Row(
+                    children: <Widget>[
+                      customOutlineButton("C"),
+                      customOutlineButton("( )"),
+                      customOutlineButton("%"),
+                      customOutlineButton("➗"),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      customOutlineButton("7"),
+                      customOutlineButton("8"),
+                      customOutlineButton("9"),
+                      customOutlineButton("x"),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      customOutlineButton("4"),
+                      customOutlineButton("5"),
+                      customOutlineButton("6"),
+                      customOutlineButton("-"),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      customOutlineButton("1"),
+                      customOutlineButton("2"),
+                      customOutlineButton("3"),
+                      customOutlineButton("+"),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      customOutlineButton("+/-"),
+                      customOutlineButton("0"),
+                      customOutlineButton("."),
+                      customOutlineButton("="),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -129,27 +134,24 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget customOutlineButton(String val) {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.all(10),
-        height: 100,
-        width: 100,
-        child: OutlinedButton(
-          style: ButtonStyle(
-            shape: MaterialStateProperty.all(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-            ),
-            backgroundColor: MaterialStateProperty.all(Colors.white),
-          ),
-          onPressed: () => btnClicked(val),
-          child: Text(
-            val,
-            style: const TextStyle(
-              fontSize: 35.0,
-              color: Colors.black,
-            ),
+    return Container(
+      margin: const EdgeInsets.symmetric(
+        vertical: 5,
+      ),
+      height: 80,
+      width: 102,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          shape: const CircleBorder(),
+          backgroundColor: (Colors.white),
+        ),
+        onPressed: () => btnClicked(val),
+        child: Text(
+          val,
+          style: const TextStyle(
+            fontSize: 25.0,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
           ),
         ),
       ),
@@ -160,6 +162,11 @@ class _HomePageState extends State<HomePage> {
   late String res, text = "";
   late String opp;
   void btnClicked(String btnText) {
+    if (btnText == "CE") {
+      if (text.isNotEmpty) {
+        text = text.substring(0, text.length - 1);
+      }
+    }
     if (btnText == "C") {
       res = "";
       text = "";
@@ -168,7 +175,10 @@ class _HomePageState extends State<HomePage> {
     } else if (btnText == "+" ||
         btnText == "-" ||
         btnText == "x" ||
-        btnText == "/") {
+        btnText == "➗" ||
+        btnText == "%" ||
+        btnText == "." ||
+        btnText == "+/-") {
       first = int.parse(text);
       res = "";
       opp = btnText;
@@ -183,8 +193,21 @@ class _HomePageState extends State<HomePage> {
       if (opp == "x") {
         res = (first * second).toString();
       }
-      if (opp == "/") {
+      if (opp == "➗") {
         res = (first ~/ second).toString();
+      }
+      if (opp == "%") {
+        res = (first % second).toString();
+      }
+    } else if (btnText == ".") {
+      if (!text.contains(".")) {
+        text = text + btnText;
+      }
+    } else if (btnText == "+/-") {
+      if (text.startsWith("-")) {
+        text = text.substring(1);
+      } else {
+        text = "-" + text;
       }
     } else {
       res = int.parse(text + btnText).toString();
